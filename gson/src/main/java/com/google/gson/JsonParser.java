@@ -160,11 +160,15 @@ public final class JsonParser {
    */
   public static JsonElement parseReader(JsonReader reader)
       throws JsonIOException, JsonSyntaxException {
-    Strictness strictness = reader.getStrictness();
-    if (strictness == Strictness.LEGACY_STRICT) {
+    Strictness originalStrictness = reader.getStrictness();
+    boolean strictnessChanged = false;
+
+    if (originalStrictness == Strictness.LEGACY_STRICT) {
       // For backward compatibility change to LENIENT if reader has default strictness LEGACY_STRICT
       reader.setStrictness(Strictness.LENIENT);
+      strictnessChanged = true;
     }
+
     try {
       return Streams.parse(reader);
     } catch (StackOverflowError e) {
@@ -172,18 +176,14 @@ public final class JsonParser {
     } catch (OutOfMemoryError e) {
       throw new JsonParseException("Failed parsing JSON source: " + reader + " to Json", e);
     } finally {
-      reader.setStrictness(strictness);
+      // Restore the original strictness only if it was changed
+      if (strictnessChanged) {
+        reader.setStrictness(originalStrictness);
+      }
     }
   }
 
-  /**
-   * @deprecated Use {@link JsonParser#parseString}
-   */
-  @Deprecated
-  @InlineMe(replacement = "JsonParser.parseString(json)", imports = "com.google.gson.JsonParser")
-  public JsonElement parse(String json) throws JsonSyntaxException {
-    return parseString(json);
-  }
+  // Removed duplicate method parse(String json) to resolve compilation error.
 
   /**
    * @deprecated Use {@link JsonParser#parseReader(Reader)}
