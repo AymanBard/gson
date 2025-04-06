@@ -195,4 +195,28 @@ public class JsonParserTest {
     // Original strictness was kept
     assertThat(reader.getStrictness()).isEqualTo(strictness);
   }
+
+  @Test
+  public void testParseEmptyStringThrowsException() {
+    JsonSyntaxException exception = assertThrows(
+        JsonSyntaxException.class, () -> JsonParser.parse(""));
+    assertThat(exception).hasMessageThat().isEqualTo("Input JSON string is null or empty.");
+  }
+
+  @Test
+  public void testParseMalformedJsonThrowsException() {
+    JsonSyntaxException exception = assertThrows(
+        JsonSyntaxException.class, () -> JsonParser.parse("{malformedJson}"));
+    assertThat(exception).hasMessageThat().contains("Malformed JSON");
+  }
+
+  @Test
+  public void testParseValidJsonReturnsJsonElement() {
+    String validJson = "{\"key\": \"value\"}";
+    JsonElement element = JsonParser.parse(validJson);
+
+    assertThat(element.isJsonObject()).isTrue();
+    JsonObject jsonObject = element.getAsJsonObject();
+    assertThat(jsonObject.get("key").getAsString()).isEqualTo("value");
+  }
 }
