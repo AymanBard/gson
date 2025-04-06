@@ -71,11 +71,34 @@ import java.io.StringReader;
  * @since 1.3
  */
 public final class JsonParser {
+
   /**
-   * @deprecated No need to instantiate this class, use the static methods instead.
+   * Parses the specified JSON string into a parse tree. An exception is thrown if the JSON string
+   * has multiple top-level JSON elements, or if there is trailing data.
+   *
+   * <p>The JSON string is parsed in {@linkplain JsonReader#setStrictness(Strictness) lenient mode}.
+   *
+   * @param json JSON text
+   * @return a parse tree of {@link JsonElement}s corresponding to the specified JSON
+   * @throws JsonParseException if the specified text is not valid JSON
+   * @since 2.8.6
    */
-  @Deprecated
-  public JsonParser() {}
+  public static JsonElement parse(String json) throws JsonSyntaxException {
+    if (json == null || json.trim().isEmpty()) {
+      throw new JsonSyntaxException("Input JSON string is null or empty.");
+    }
+
+    try (JsonReader reader = new JsonReader(new StringReader(json))) {
+      reader.setStrictness(Strictness.LENIENT);
+      return Streams.parse(reader);
+    } catch (MalformedJsonException e) {
+      throw new JsonSyntaxException("Malformed JSON: " + e.getMessage(), e);
+    } catch (IOException e) {
+      throw new JsonSyntaxException("I/O error while parsing JSON: " + e.getMessage(), e);
+    } catch (Exception e) {
+      throw new JsonSyntaxException("Unexpected error while parsing JSON: " + e.getMessage(), e);
+    }
+  }
 
   /**
    * Parses the specified JSON string into a parse tree. An exception is thrown if the JSON string
