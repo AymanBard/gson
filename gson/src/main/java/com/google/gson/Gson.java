@@ -17,10 +17,12 @@
 package com.google.gson;
 
 import com.google.gson.internal.TypeAdapterRegistry;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.internal.bind.JsonAdapterAnnotationTypeAdapterFactory;
 import com.google.gson.internal.bind.TypeAdapters;
+import com.google.gson.internal.bind.util.UnifiedDateTypeAdapter;
+import com.google.gson.reflect.TypeToken;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,7 +41,9 @@ public final class Gson {
             TypeAdapters.STRING_FACTORY,
             TypeAdapters.INTEGER_FACTORY,
             // Add other default factories here
-            new JsonAdapterAnnotationTypeAdapterFactory(null)
+            new JsonAdapterAnnotationTypeAdapterFactory(null),
+            // Add the unified date adapter
+            TypeAdapters.newFactory(Date.class, new UnifiedDateTypeAdapter())
         );
         this.jsonAdapterFactory = new JsonAdapterAnnotationTypeAdapterFactory(null);
     }
